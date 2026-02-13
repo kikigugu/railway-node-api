@@ -5,6 +5,11 @@ const app = express();
 app.use(express.json());
 
 // Initialize Turso client
+if (!process.env.TURSO_CONNECTION_URL || !process.env.TURSO_AUTH_TOKEN) {
+  console.error("Missing required environment variables: TURSO_CONNECTION_URL or TURSO_AUTH_TOKEN");
+  process.exit(1);
+}
+
 const client = createClient({
   url: process.env.TURSO_CONNECTION_URL,
   authToken: process.env.TURSO_AUTH_TOKEN,
@@ -29,7 +34,7 @@ app.get("/", (req, res) => {
 // GET endpoint to fetch data from Turso
 app.get("/data", async (req, res) => {
   try {
-    const result = await client.execute("SELECT * FROM TABLE01");
+    const result = await client.execute("SELECT * FROM your_table_name");
     
     return res.status(200).json({
       status: "success",
@@ -59,6 +64,12 @@ app.post("/log", async (req, res) => {
   try {
     // Log to console
     console.log("LOG:", uid, action);
+
+    // Optionally insert into Turso database
+    await client.execute(
+      "INSERT INTO logs (uid, action, timestamp) VALUES (?, ?, ?)",
+      [uid, action, new Date().toISOString()]
+    );
 
     // Return proper status message
     return res.status(200).json({
