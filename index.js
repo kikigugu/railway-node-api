@@ -3,16 +3,23 @@ import express from "express";
 const app = express();
 app.use(express.json());
 
-// CORS (important for Chrome)
+// Enable CORS so Chrome/Userscripts can call this API
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", "*"); // allow all domains
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   next();
 });
 
+// Preflight OPTIONS request handling
 app.options("*", (_, res) => res.sendStatus(200));
 
+// Simple GET to check server
+app.get("/", (req, res) => {
+  res.json({ status: "Railway Node backend running 🚆" });
+});
+
+// POST endpoint to log actions
 app.post("/log", (req, res) => {
   const { uid, action } = req.body;
 
@@ -25,17 +32,15 @@ app.post("/log", (req, res) => {
 
   console.log("LOG:", uid, action);
 
+  // Return proper status message
   return res.status(200).json({
     status: "success",
     message: "Log received",
-    data: {
-      uid,
-      action
-    }
+    data: { uid, action }
   });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+  console.log(`Server running on port ${PORT}`);
 });
