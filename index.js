@@ -34,7 +34,7 @@ app.get("/", (req, res) => {
 // GET endpoint to fetch data from Turso
 app.get("/data", async (req, res) => {
   try {
-    const result = await client.execute("SELECT * FROM your_table_name");
+    const result = await client.execute("SELECT * FROM TABLE01");
     
     return res.status(200).json({
       status: "success",
